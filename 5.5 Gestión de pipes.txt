@@ -1,0 +1,58 @@
+DESC pipe MANAGE_DB.pipes.employee_pipe;
+
+SHOW PIPES;
+
+SHOW PIPES like '%employee%'
+
+SHOW PIPES in database MANAGE_DB
+
+SHOW PIPES in schema MANAGE_DB.pipes
+
+SHOW PIPES like '%employee%' in Database MANAGE_DB
+
+
+
+-- Modificar pipe (alterar stage o file format) --
+
+// Preparación de la tabla 2
+CREATE OR REPLACE TABLE PRIMERABBDD.PRIMERESQUEMA.employees2 (
+  id INT,
+  first_name STRING,
+  last_name STRING,
+  email STRING,
+  location STRING,
+  department STRING
+  )
+
+
+// Pausar pipe
+ALTER PIPE MANAGE_DB.pipes.employee_pipe SET PIPE_EXECUTION_PAUSED = true
+ 
+ 
+// Verificar que el pipe está en pausa y pendingFileCount = 0 
+SELECT SYSTEM$PIPE_STATUS('MANAGE_DB.pipes.employee_pipe') 
+ 
+ // Recrear pip y cambiar definición en el COPY
+CREATE OR REPLACE pipe MANAGE_DB.pipes.employee_pipe
+auto_ingest = TRUE
+AS
+COPY INTO PRIMERABBDD.PRIMERESQUEMA.employees2
+FROM @MANAGE_DB.external_stages.csv_folder  
+
+ALTER PIPE  MANAGE_DB.pipes.employee_pipe refresh
+
+// Listar ficheros en el stage
+LIST @MANAGE_DB.external_stages.csv_folder  
+
+SELECT * FROM PRIMERABBDD.PRIMERESQUEMA.employees2
+
+ // Recargar manualmente los ficheros que estaban en el bucket previamente
+COPY INTO PRIMERABBDD.PRIMERESQUEMA.employees2
+FROM @MANAGE_DB.external_stages.csv_folder  
+
+
+// Reactivar pipe
+ALTER PIPE MANAGE_DB.pipes.employee_pipe SET PIPE_EXECUTION_PAUSED = false
+
+// Verificar que el pipe está activo de nuevo
+SELECT SYSTEM$PIPE_STATUS('MANAGE_DB.pipes.employee_pipe')

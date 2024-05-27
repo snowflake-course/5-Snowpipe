@@ -1,0 +1,33 @@
+// Creación de la tabla
+CREATE OR REPLACE TABLE PRIMERABBDD.PRIMERESQUEMA.employees (
+  id INT,
+  first_name STRING,
+  last_name STRING,
+  email STRING,
+  location STRING,
+  department STRING
+  )
+    
+
+// Creación objeto formato fichero
+CREATE OR REPLACE file format MANAGE_DB.file_formats.csv_fileformat
+    type = csv
+    field_delimiter = ','
+    skip_header = 1
+    null_if = ('NULL','null')
+    empty_field_as_null = TRUE;
+    
+    
+ // Crear stage con objeto integración y objeto formato fichero
+CREATE OR REPLACE stage MANAGE_DB.external_stages.csv_folder
+    URL = 's3://mibucketdecargasnowflake/snowpipe'
+    STORAGE_INTEGRATION = s3_int
+    FILE_FORMAT = MANAGE_DB.file_formats.csv_fileformat
+   
+
+ // Visualizar los ficheros que hay en el stage
+LIST @MANAGE_DB.external_stages.csv_folder  
+
+
+// Creación de un esquema para organizar los pipes
+CREATE OR REPLACE SCHEMA MANAGE_DB.pipes

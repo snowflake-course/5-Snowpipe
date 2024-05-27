@@ -1,0 +1,11 @@
+// Definir el pipe
+CREATE OR REPLACE pipe MANAGE_DB.pipes.employee_pipe
+auto_ingest = TRUE
+AS
+COPY INTO PRIMERABBDD.PRIMERESQUEMA.employees
+FROM @MANAGE_DB.external_stages.csv_folder  
+
+// Descripción del pipe
+DESC pipe employee_pipe
+    
+SELECT * FROM PRIMERABBDD.PRIMERESQUEMA.employees    
